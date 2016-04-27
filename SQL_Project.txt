@@ -1,0 +1,112 @@
+1.
+SELECT B.BookId, B.Title, BC.BranchId, BC.No_of_Copies, LB.BranchName
+FROM Book1 AS B INNER JOIN Book_Copies AS BC
+ON B.BookId=BC.BookId
+INNER JOIN Library_Branch AS LB
+ON LB.BranchId=BC.BranchId
+WHERE BranchName='Sharptown Central' AND Title=' The Lost Tribe' -----there is a space before the in table so need space!
+WHERE LB.BranchName='Sharptown Central' AND BC.No_of_Copies= 2 -----y
+WHERE LB.BranchName='Sharptown Central' AND BC.BranchId= 22 ----y
+
+OR
+1.
+SELECT B.BookId, B.Title, BC.BranchId, BC.No_of_Copies, LB.BranchName
+FROM Book_Copies AS BC INNER JOIN Library_Branch AS LB
+ON LB.BranchId=BC.BranchId
+INNER JOIN Book1 AS B
+ON B.BookId=BC.BookId
+WHERE LB.BranchName='Sharptown Central' AND B.Title= ' The Curious Incident of the Dog in the Night-Time'; -----Y
+
+------
+2.
+SELECT B.BookId, B.Title, BC.BranchId, BC.No_of_Copies
+FROM Book1 AS B INNER JOIN Book_Copies AS BC
+ON B.BookId=BC.BookId
+WHERE Title='The Lost Tribe' ---> not giving output
+-----
+3. SELECT * FROM Borrower
+SELECT * FROM Book_Loans
+
+SELECT B.Name, B.CardNo, BL.DueDate
+FROM Borrower AS B INNER JOIN Book_Loans AS BL
+ON B.CardNo=BL.CardNo
+
+WHERE DueDate IS NULL
+-----
+4. 
+SELECT * FROM Borrower
+SELECT * FROM Book1
+SELECT * FROM Book_Loans
+SELECT * FROM Library_Branch
+
+SELECT Bo.Title, B.Name, B.Address, LB.BranchName, BL.DueDate
+FROM Book_Loans AS BL INNER JOIN Borrower AS B
+ON B.CardNo=BL.CardNo
+INNER JOIN Book1 AS Bo
+ON BL.BookId=Bo.BookID
+INNER JOIN Library_Branch AS LB
+ON BL.BranchId=LB.BranchId   
+WHERE BranchName='Sharptown Central' 
+GO
+------------
+5.
+SELECT * FROM Book_Loans
+SELECT * FROM Library_Branch
+
+SELECT LB.BranchId,LB.BranchName, BL.BookId, BL.DueDate
+FROM Book_Loans AS BL INNER JOIN Library_Branch AS LB
+ON BL.BranchId=LB.BranchId 
+SELECT COUNT(*) FROM Book_Loans
+--------
+6.
+SELECT B.Name, B.Address, BL.CardNo, BL.BookId, BL.DueDate
+FROM Borrower AS B INNER JOIN Book_Loans AS BL
+ON B.CardNo=BL.CardNo
+SELECT CardNo FROM Book_Loans
+GROUP BY Book_Loans.CardNo
+HAVING COUNT(Book_Loans.CardNo)>5
+
+SELECT Borrower.Name FROM Borrower,Book_Loans
+WHERE Borrower.CardNo=Book_Loans.CardNo
+GROUP BY Borrower.Name
+HAVING COUNT(Name)>5
+------
+7.
+SELECT B.BookId, B.Title, BA.AuthorName, BC.BranchId, BC.No_of_Copies, LB.BranchName
+FROM Book1 AS B INNER JOIN Book_Copies AS BC
+ON B.BookId=BC.BookId
+INNER JOIN Library_Branch AS LB
+ON LB.BranchId=BC.BranchId
+INNER JOIN Book_Authors AS BA
+ON B.BookId=BA.BookId
+WHERE BranchName='Sharptown Central' AND AuthorName='Philip K Dick'
+----
+Drill_2_C
+
+USE LibManSystem 
+Go
+
+CREATE PROC GetBookDetails @BranchName nvarchar(50), @Title nvarchar(50)
+AS
+
+SELECT B.BookId, B.Title, BA.AuthorName, BC.BranchId, BC.No_of_Copies, LB.BranchName
+FROM Book1 AS B INNER JOIN Book_Copies AS BC
+ON B.BookId=BC.BookId
+INNER JOIN Library_Branch AS LB
+ON LB.BranchId=BC.BranchId
+INNER JOIN Book_Authors AS BA
+ON B.BookId=BA.BookId
+
+WHERE BranchName=@BranchName AND Title=@Title
+GO
+EXEC GetBookDetails @BranchName= 'Sharptown Central', @Title= ' Do Androids Dream of Electric Sheep?'
+EXEC GetBookDetails @BranchName= '	Downtown', @Title= ' EatsShootsLeaves' /* space is intentional as there was space in the table*/
+EXEC GetBookDetails @BranchName= '	South East', @Title= ' The Earth My Butt and Other Big Round Things'
+---------------------------------------------
+
+
+
+
+
+
+
