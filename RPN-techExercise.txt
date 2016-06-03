@@ -1,0 +1,90 @@
+import java.util.Scanner;
+import java.util.Stack;
+
+public class TechEx {
+		public static void main(String[] args) {
+		// Main method for class TechEx for Test
+		String[] equations = new String[8];
+	    Double[] answers = new Double[8];
+	    double answer = 0.0;
+	    // addition will pass
+	    equations[0] = "6 7 +";
+	    // multiple operators! this equation will pass
+	    equations[1] = "4 -2 * 2 *";
+	    // division will pass
+	    equations[2]= "4 2 /";
+	    // this equations will pass
+	    equations[3] = "2 3 4 + *";
+	    // insufficient input for '+' operator
+	    equations[4] = "2 +";
+	    //couldn't parse 'r' as an integer or operator
+	    equations[5] = "2 2 r";
+	    equations[6] = null;
+	        
+	    // loop for evaluating equations
+	    for (int i = 0; i < equations.length; i++) {
+	      System.out.println("Equation #" + (i + 1) + ": " + equations[i]
+	          + ".");
+	      // method that calculate answer
+	      answer = calcRPN(equations[i]); 
+     
+	      System.out.println("Success! The calculated value of "
+	          + equations[i] + " is " + answer + ".\n");
+	    }
+	}
+	//check for mathematical operators in next value
+	public static boolean nextIsOperator(String next) {
+	    return (next.equals("+") || next.equals("-") || next.equals("*") || next
+	        .equals("/"));
+	  }
+	// returns calculated value of the line input
+	public static double calcRPN(String input) {
+	    // trimming whitespace from input
+	    input = input.trim();
+	    // scan input and stack to store double values
+	    String next;
+	    Stack<Double> stack = new Stack<Double>();
+	    Scanner scan = new Scanner(input);
+
+	    // looping when tokens left in scan
+	    while (scan.hasNext()) {
+	      // retrieving the next token from the input
+	      next = scan.next();
+
+	      // check if token is mathematical operator
+	      if (nextIsOperator(next)) {
+	        // check if there are enough numbers on stack
+	        if (stack.size() > 1) {
+	          if (next.equals("+")) {
+	            stack.push((Double) stack.pop() + (Double) stack.pop());
+	          } else if (next.equals("-")) {
+	            stack.push(-(Double) stack.pop() + (Double) stack.pop());
+	          } else if (next.equals("*")) {
+	            stack.push((Double) stack.pop() * (Double) stack.pop());
+	          } else if (next.equals("/")) {
+	            double first = stack.pop();
+	            double second = stack.pop();
+	            stack.push(second / first);           
+	          }else if (next.equals("r")) {
+	        	  System.out.println("There is no operator 'r' in RPN");
+		          }
+	        } else {
+	          System.out.println("An operator occured without numerical values to evaluate.");
+	        }
+	      } else {
+	        try {
+	          stack.push(Double.parseDouble(next));
+	        } catch (NumberFormatException c) {
+	          System.out.println("The string is not in valid RPN format.");
+	        }
+	      }
+	    }
+
+	    if (stack.size() > 1) {
+	      System.out.println("Too many numbers per mathematical operators .");
+	    }
+
+	    return (Double) stack.pop();
+	  }
+	
+	}
