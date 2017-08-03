@@ -44,9 +44,8 @@ namespace FileCheck
 
         public static bool FileCheck(string FileName)
         {
-
-            /*  file check to see if it was modified within */
-            /* the last 24 hours                          */
+                        //  file check to see if it was modified within 
+                           /* the last 24 hours*/
 
 
             // Get the attributes of the file
