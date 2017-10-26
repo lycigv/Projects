@@ -1,52 +1,83 @@
-#Python 3.5 SQLite3 FileTransfer Drill TN & LG
+# LG's Simple python GUI to transfer recently modified files 
+
 from tkinter import *
 from tkinter import ttk
-from tkinter import filedialog
-import os
-import shutil
-import datetime as dt
+from tkinter.filedialog import askdirectory
+import datetime
 import time
+import shutil
+import os
+from os import path
 import sqlite3
-root = Tk()
-#create database and table
-conn = sqlite3.connect('fileTransferdb.db')
-c = conn.cursor()
-c.execute('CREATE TABLE IF NOT EXISTS timeElapsed(time TIMESTAMP)')
-c.execute('INSERT INTO timeElapsed VALUES (2017)') # dummy value for the table/ first entry
-#functions to attach in buttons
-varD = StringVar()
-varC = StringVar()
-def askSource():
-    desName = filedialog.askdirectory()
-    if desName:
-        varD.set(desName)
-def askDestination():
-    desName = filedialog.askdirectory()
-    if desName:
-        varC.set(desName)
-def fileCopy():# inserts time to db whenever copy button is pressed and copies files
-    now = dt.datetime.now()
-    c.execute('INSERT INTO timeElapsed VALUES(?)',(now.strftime('%Y-%m-%d %H:%M'),))                                
-    conn.commit()
-    ago = now - dt.timedelta(hours = 24)
-    #get the paths for send and recieving folders
-    sender = varD.get()
-    receiver = varC.get()    
-    for fname in os.listdir(sender):
-        path = os.path.join(sender, fname)
-        st = os.stat(path)
-        mtime = dt.datetime.fromtimestamp(st.st_mtime)
-        if mtime > ago:
-            shutil.copy2(path, receiver)
-            print (fname)             
-# select time of last file move from db
-c.execute('SELECT time FROM timeElapsed ORDER by time DESC')
-theTime = c.fetchone()[0]
-#Buttons & Labels
-browseButton = ttk.Button(text = 'SourceFile  Folder', command = askSource).grid(row = 1, column = 2, padx = 5, pady = 5)
-browseButton = ttk.Button(text = 'Destination Folder', command = askDestination).grid(row = 2, column = 2, padx = 5, pady = 5)
-copyButton = ttk.Button(root, text = 'Copy The Files', command = fileCopy).grid(row = 3, column = 1, padx = 5, pady = 5)
-pathLabel = ttk.Entry(text = varD).grid(row = 1, column = 1, padx = 1, pady = 1)
-pathLabel = ttk.Entry(text = varC).grid(row = 2, column = 1, padx = 1, pady = 1)
-timeLabel = ttk.Label(text = "Last File Check:  "+ str(theTime)).grid(row = 4, column = 1,padx = 1, pady = 1)
-# The END
+
+
+class CopyFileApp:
+    
+    def __init__(self, master):
+        
+        self.LastRun= StringVar()
+        label = ttk.Entry(master, textvariable = self.LastRun).pack()
+        button = ttk.Button(master, text = "Click For Last Run Time:", command = self.get_last_time).pack()
+
+        self.source= StringVar()
+        label = ttk.Entry(master, textvariable = self.source).pack()
+        button = ttk.Button(master, text = "Select Source Folder", command=self.load_src ).pack()
+
+        self.destination = StringVar()
+        label = ttk.Entry(master, textvariable= self.destination).pack()
+        button = ttk.Button(master, text = "Select Destination Folder",command=self.load_dst ).pack()
+     
+        self.FilesMoved=StringVar()        
+        label = ttk.Entry(master, textvariable = self.FilesMoved).pack()
+        button = ttk.Button(master, text = "Copy New Files Now", command = self.check_file_contents).pack()
+        self.createDb()
+        
+    def load_src(self):
+        self.src = askdirectory()
+        self.source.set(self.src)
+           
+    def load_dst(self):
+        self.dst = askdirectory()
+        self.destination.set(self.dst)
+
+    def get_last_time(self):
+        conn = sqlite3.connect('click_time_stamp.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM time_stamp ORDER BY Time DESC Limit 1')
+        last_time = c.fetchone() 
+        self.LastRun.set(last_time) 
+                
+    def check_file_contents(self):
+        self.unix = time.time()       
+        for file in os.listdir(self.src):
+            if file.endswith('.txt'):
+                src_name = os.path.join(self.src,file)
+                modified_time = os.path.getmtime(src_name)
+                elapsed_time = self.unix - modified_time
+                if elapsed_time < 86400:   
+                    shutil.copy(src_name,self.dst)
+                    self.insertDb()
+                    self.FilesMoved.set(file)
+   
+    def createDb(self):
+        conn = sqlite3.connect('click_time_stamp.db')
+        c = conn.cursor()
+        c.execute('CREATE TABLE IF NOT EXISTS time_stamp (Time TEXT)')  
+               
+    def insertDb(self):
+        conn = sqlite3.connect('click_time_stamp.db')
+        c = conn.cursor()
+        last_stamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.unix))
+        print(last_stamp)
+        c.execute('INSERT INTO time_stamp (Time) VALUES(?)',(last_stamp,))
+        conn.commit()                        
+        c.close
+        conn.close
+              
+def main():  
+    root = Tk() 
+    app = CopyFileApp(root)
+    root.mainloop()
+    
+if __name__ == "__main__": 
+	main()
