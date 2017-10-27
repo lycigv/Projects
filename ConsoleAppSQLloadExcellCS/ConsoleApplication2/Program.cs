@@ -8,7 +8,7 @@ using System.Threading;
 namespace ConsoleApplication2
 
     /* What I did in this was to create a Console application in VS then use C# code to load data to a database in SQL Server.
-     I created database manualy in SQL Server, then table with Columns as in Excel Sheet */
+     I created database manualy in SQL Server, then table with matching Columns as in Excel Sheet */
 {
     class Transfer
     {
@@ -18,14 +18,18 @@ namespace ConsoleApplication2
             string LogFolder = @"c:\Log";
             try
             {
-                string DatabaseName = "booklistSQL";
+                string DatabaseName = "booklistSQL";               
                 //string SQLServerName = "(LocalDB)\\MSSQLLocalDB";
                 string SQLServerName = ".\\SQLEXPRESS";
-                string TableName = @"Book";
+                //string TableName = @"Book";
+                string TableName = @"Book2";
                 string SchemaName = @"dbo";
-                string fullFilePath = @"C:\Users\Student\Documents\GitHub\Projects\ConsoleAppSQLloadExcellCS\ExcelData.xls";
+                //string fullFilePath = @"C:\Users\Student\Documents\GitHub\Projects\ConsoleAppSQLloadExcellCS\ExcelData.xls";
+                //string fileName = "ExcelData.xls";
+                //string fullFilePath = @"Data\" + fileName; //Data is a folder in projectfolder and .xls is saved there
+                //string fullFilePath = Path.Combine(Environment.CurrentDirectory, @"Data\", fileName);
+                string fullFilePath = @"ExcelData.xls"; //file path  is ConsoleApplication2\bin\Debug
                 //string sheetName = "Sheet1";
-               
                 string sheetName = "USDA table";
 
                 SqlConnection SQLConnection = new SqlConnection();
@@ -50,6 +54,10 @@ namespace ConsoleApplication2
                 Conn.Close();
 
                 SQLConnection.Open();
+                //If not exists (select name from sysobjects where name = 'Book2')
+                using (SqlCommand command = new SqlCommand("CREATE TABLE Book2 (ID int, Name char(50), Email char(50),Password char(50));", SQLConnection))
+                command.ExecuteNonQuery();  // this create new table to database
+
                 using (SqlBulkCopy BC = new SqlBulkCopy(SQLConnection))
                 {
                     
